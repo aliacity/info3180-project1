@@ -30,18 +30,42 @@ def about():
     """Render the website's about page."""
     return render_template('about.html', name="Mary Jane")
 
-@app.route('/profile',methods=('GET','POST'))
+@app.route('/profiles')
+def profiles():
+    profiles = db.session.query(UserProfile).all()
+    return render_template('profiles.html', profiles = profiles)
+
+@app.route('/profile/<int:userid>')
+def show_profile(userid):
+    user = db.session.query(UserProfile).get(userid)
+    return render_template('show_profile.html', user=user)
+
+@app.route('/profile', methods=['GET','POST'])
 def profile():
-    form = ContactForm()
-    if form.validate_on_submit():
-        msg = Message(request.form['subject'], sender=(request.form['name'],
-        request.form['email']),recipients=["bradleythompsonbct@gmail.com"])
-        msg.body = request.form['message']
-        mail.send(msg)
-        flash('Message sent from %s'%(request.form['name']))
-        return redirect('/')
-    return  render_template('profile.html',form=form)
-    
+    profile = Profile()
+
+    if request.method == 'POST' and profile.validate_on_submit():
+        file = profile.dp.data
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(path, filename))
+        
+        user = UserProfile(
+            request.form['firstname'],
+            request.form['lastname'],
+            request.form['email'],
+            request.form['location'],
+            request.form['gender'],
+            request.form['biography'],
+            filename,
+            datetime.datetime.now().strftime("%B %d, %Y")
+        )
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        flash('Profile Updated', 'success')
+        return redirect(url_for("profiles")) 
+    return render_template("profile.html", form=profile)
 
 
 ###
