@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField,SelectField
-from wtforms.validators import DataRequired, Length
+from wtforms import StringField, PasswordField, SelectField, TextAreaField
+from wtforms.validators import InputRequired, Email, Length, DataRequired
+from flask_wtf.file import FileField, FileRequired, FileAllowed
 
 class ContactForm(FlaskForm):
     fname = StringField('First Name',
@@ -20,4 +21,6 @@ class ContactForm(FlaskForm):
     biography = StringField('Biography',
     validators=[DataRequired()])
     
-    # Submit = SubmitField('Send')
+    profpic = FileField('ProfilePic', validators=[FileRequired('This field cannot be left empty'),FileAllowed(['jpg','png','jpeg'],'File format not allowed')])
+    
+    
